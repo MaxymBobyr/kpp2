@@ -1,0 +1,51 @@
+id,name,model,serialNumber,status,location
+1,Верстат ЧПУ,Fanuc-2000,SN-10001,ACTIVE,Цех №1
+2,Компресор,Atlas Copco,SN-10002,BROKEN,Підвал
+3,Генератор,Kohler,SN-10003,MAINTENANCE,Дах
+4,Конвеєрна стрічка,Siemens,SN-10004,ACTIVE,Склад
+5,Зварювальний апарат,ESAB,SN-10005,BROKEN,Цех №2
+6,Осцилограф,Tektronix,SN-10006,MAINTENANCE,Лабораторія
+7,Промисловий робот,ABB,SN-10007,ACTIVE,Цех №1
+8,Гідравлічний прес,Bosch,SN-10008,ACTIVE,Цех №2
+9,Токарний верстат,Haas,SN-10009,BROKEN,Цех №1
+10,Фрезерний верстат,DMG Mori,SN-10010,MAINTENANCE,Цех №1
+11,Будівельний фен,Karcher,SN-10011,ACTIVE,Склад
+12,Парогенератор,Electrolux,SN-10012,ACTIVE,Пральня
+13,Дизельний двигун,Caterpillar,SN-10013,BROKEN,Гараж
+14,Повітряний насос,Kaeser,SN-10014,ACTIVE,Цех №2
+15,Термостат,Memmert,SN-10015,MAINTENANCE,Лабораторія
+16,Мультиметр,Fluke,SN-10016,ACTIVE,Лабораторія
+17,Джерело живлення,Mean Well,SN-10017,ACTIVE,Лабораторія
+18,Дриль ударний,Makita,SN-10018,BROKEN,Склад
+19,Шліфувальна машина,Makita,SN-10019,ACTIVE,Цех №2
+20,Промисловий пилосос,Karcher,SN-10020,ACTIVE,Склад
+21,Холодильна установка,Daikin,SN-10021,BROKEN,Їдальня
+22,Вентиляційна система,Systemair,SN-10022,ACTIVE,Дах
+23,Електродвигун,Siemens,SN-10023,MAINTENANCE,Цех №1
+24,Редуктор,Lenze,SN-10024,ACTIVE,Цех №1
+25,Насос відцентровий,Grundfos,SN-10025,BROKEN,Підвал
+26,Котел опалення,Vaillant,SN-10026,ACTIVE,Підвал
+27,Стабілізатор напруги,Volter,SN-10027,ACTIVE,Серверна
+28,ДБЖ,APC,SN-10028,MAINTENANCE,Серверна
+29,Мережевий комутатор,Cisco,SN-10029,ACTIVE,Серверна
+30,Сервер,Dell,SN-10030,ACTIVE,Серверна
+31,Монітор,LG,SN-10031,BROKEN,Офіс
+32,Принтер,HP,SN-10032,MAINTENANCE,Офіс
+33,Сканер,Epson,SN-10033,ACTIVE,Офіс
+34,Кондиціонер,Samsung,SN-10034,BROKEN,Офіс
+35,Кавоварка,Philips,SN-10035,ACTIVE,Кухня
+36,Мікрохвильовка,Bosch,SN-10036,ACTIVE,Кухня
+37,Лабораторна центрифуга,Eppendorf,SN-10037,MAINTENANCE,Лабораторія
+38,Мікроскоп,Olympus,SN-10038,ACTIVE,Лабораторія
+39,Аналізатор води,Hach,SN-10039,BROKEN,Лабораторія
+40,Термометр інфрачервоний,Testo,SN-10040,ACTIVE,Склад
+41,Гайковерт пневматичний,Ingersoll Rand,SN-10041,ACTIVE,Цех №2
+42,Лещата слюсарні,Stanley,SN-10042,ACTIVE,Цех №2
+43,Прес-форма,Schuler,SN-10043,MAINTENANCE,Цех №1
+44,Кран-балка,Demag,SN-10044,ACTIVE,Цех №1
+45,Тельфер,Demag,SN-10045,BROKEN,Цех №1
+46,Електрокар,Toyota,SN-10046,ACTIVE,Склад
+47,Гідравлічний візок,Rockwell,SN-10047,ACTIVE,Склад
+48,Стелаж металевий,Space,SN-10048,ACTIVE,Склад
+49,Вогнегасник,Пожмашина,SN-10049,MAINTENANCE,Коридор
+50,Система пожежогасіння,Tyco,SN-10050,ACTIVE,Будівля
