@@ -25,7 +25,7 @@ public class Main {
             System.err.println("Текст помилки: " + e.getMessage());
             System.err.println("\nПеревірте:");
             System.err.println("1. Чи запущений сервер MySQL (Apache та MySQL у XAMPP/OpenServer).");
-            System.err.println("2. Чи правильно вказано логін та пароль у DatabaseConnection.java.");
+            System.err.println("2. Чи правильно вказано логін та пароль у DBUtil.java.");
             System.err.println("3. Чи створена база даних 'equipment_db'.");
         }
     }

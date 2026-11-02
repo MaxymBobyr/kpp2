@@ -10,7 +10,6 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 ~$яснювальна_записка_КПП_варіант_3.docx
-Пояснювальна_записка_КПП_варіант_3.docx
 # --- IntelliJ IDEA ---
 .idea/
 *.iws
@@ -31,6 +30,3 @@ local_config.json
 # --- Файли операційної системи ---
 .DS_Store
 Thumbs.db
-
-.gitignore
-.gitattributes
