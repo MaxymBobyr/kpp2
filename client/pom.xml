@@ -19,12 +19,10 @@
     </properties>
 
     <dependencies>
-        <!-- Server module provides ua.kpp.db.DatabaseConnection -->
         <dependency>
             <groupId>org.example</groupId>
             <artifactId>server</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
 </project>

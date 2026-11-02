@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <display-name>Air Quality Coursework Server</display-name>
+
+    <servlet>
+        <servlet-name>EquipmentServlet</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.EquipmentServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EquipmentServlet</servlet-name>
+        <url-pattern>/equipment</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SpecialistServlet</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.SpecialistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SpecialistServlet</servlet-name>
+        <url-pattern>/specialist</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ServiceRequestServlet</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.ServiceRequestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceRequestServlet</servlet-name>
+        <url-pattern>/service-request</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ServiceRecordServlet</servlet-name>
+        <servlet-class>ua.edu.nupp.kpp.server.ServiceRecordServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceRecordServlet</servlet-name>
+        <url-pattern>/service-record</url-pattern>
+    </servlet-mapping>
+
+</web-app>

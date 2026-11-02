@@ -1,0 +1,4 @@
+equipment_id,name,model,serial_number,status,location
+1,Верстат ЧПУ,Fanuc-2000,SN-12345,ACTIVE,Цех №1
+2,Компресор,Atlas Copco,SN-98765,BROKEN,Підвал
+3,Генератор,Kohler,SN-55555,MAINTENANCE,Дах
