@@ -1,4 +1,6 @@
-equipment_id,name,model,serial_number,status,location
-1,Верстат ЧПУ,Fanuc-2000,SN-12345,ACTIVE,Цех №1
-2,Компресор,Atlas Copco,SN-98765,BROKEN,Підвал
-3,Генератор,Kohler,SN-55555,MAINTENANCE,Дах
+equipment_id;name;model;serial_number;status;location
+;Верстат ЧПУ CSV;Fanuc-2000;SN-CSV-00001;ACTIVE;Цех №1
+;Компресор CSV;Atlas Copco;SN-CSV-00002;BROKEN;Підвал
+;Генератор CSV;Kohler;SN-CSV-00003;MAINTENANCE;Дах
+;Токарний верстат CSV;16К20;SN-CSV-00004;ACTIVE;Цех №2
+;Фрезерний верстат CSV;6А82;SN-CSV-00005;ACTIVE;Цех №2
