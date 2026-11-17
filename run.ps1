@@ -23,7 +23,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 # ------------------------------------------------------------------
 
 # ------------------------- НАЛАШТУВАННЯ -------------------------
-$TomcatHome = "C:\apache-tomcat-9.0.123"
+$TomcatHome = "D:\xampp\tomcat"
 $JavaHome   = "D:\Java21"
 $MySqlHome  = "D:\xampp"
 $ProjectRoot = $PSScriptRoot

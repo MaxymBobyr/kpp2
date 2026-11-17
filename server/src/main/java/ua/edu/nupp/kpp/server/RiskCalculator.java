@@ -5,10 +5,6 @@ public class RiskCalculator {
     private RiskCalculator() {
     }
 
-    /**
-     * F1 = max(0; min(100; (concentration - limitValue) / limitValue * 100))
-     * concentration ≥ 0, limitValue > 0
-     */
     public static double factor1(double concentration, double limitValue) {
         if (concentration < 0) {
             throw new IllegalArgumentException("concentration не може бути від'ємним");
@@ -26,11 +22,6 @@ public class RiskCalculator {
         return f1;
     }
 
-    /**
-     * I = 0.40·F1 + 0.35·F2 + 0.25·F3
-     * Всі фактори: 0..100
-     * Результат округлюється до 2 знаків після коми
-     */
     public static double calculate(double f1, double f2, double f3) {
         if (f1 < 0 || f1 > 100 || f2 < 0 || f2 > 100 || f3 < 0 || f3 > 100) {
             throw new IllegalArgumentException("Фактори мають бути в діапазоні 0..100");

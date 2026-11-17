@@ -1,28 +1,14 @@
--- =====================================================================
--- СКРИПТ СТВОРЕННЯ БАЗИ ДАНИХ ДЛЯ КУРСОВОГО ПРОЄКТУ
--- Тема: Облік та обслуговування обладнання
--- =====================================================================
-
--- 0. КОДУВАННЯ ФАЙЛУ
--- Гарантує, що клієнт MySQL прочитає цей файл саме в UTF-8
--- (інакше кирилиця буде зіпсута під час завантаження)
 SET NAMES utf8mb4;
 
--- 1. СТВОРЕННЯ БАЗИ ДАНИХ
 DROP DATABASE IF EXISTS equipment_db;
 CREATE DATABASE equipment_db;
 USE equipment_db;
 
--- 2. ВИДАЛЕННЯ ТАБЛИЦЬ (для можливості повторного запуску скрипта)
--- Порядок важливий: спочатку видаляємо таблиці з зовнішніми ключами
 DROP TABLE IF EXISTS service_record;
 DROP TABLE IF EXISTS service_request;
 DROP TABLE IF EXISTS specialist;
 DROP TABLE IF EXISTS equipment;
 
--- 3. СТВОРЕННЯ ТАБЛИЦЬ
-
--- Таблиця 1: Обладнання
 CREATE TABLE equipment (
                            id BIGINT PRIMARY KEY AUTO_INCREMENT,
                            name VARCHAR(255) NOT NULL,
@@ -32,7 +18,6 @@ CREATE TABLE equipment (
                            location VARCHAR(255)
 ) DEFAULT CHARACTER SET utf8mb4;
 
--- Таблиця 2: Фахівці
 CREATE TABLE specialist (
                             id BIGINT PRIMARY KEY AUTO_INCREMENT,
                             full_name VARCHAR(255) NOT NULL,
@@ -41,7 +26,6 @@ CREATE TABLE specialist (
                             availability_status VARCHAR(50)
 ) DEFAULT CHARACTER SET utf8mb4;
 
--- Таблиця 3: Заявки на обслуговування
 CREATE TABLE service_request (
                                  id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                  equipment_id BIGINT NOT NULL,
@@ -49,12 +33,10 @@ CREATE TABLE service_request (
                                  priority VARCHAR(50),
                                  status VARCHAR(50),
                                  created_date DATE,
-    -- Зовнішній ключ (FK) на таблицю обладнання
                                  CONSTRAINT fk_request_equipment FOREIGN KEY (equipment_id)
                                      REFERENCES equipment (id) ON DELETE CASCADE
 ) DEFAULT CHARACTER SET utf8mb4;
 
--- Таблиця 4: Сервісні записи (факти виконання робіт)
 CREATE TABLE service_record (
                                 id BIGINT PRIMARY KEY AUTO_INCREMENT,
                                 request_id BIGINT NOT NULL,
@@ -62,16 +44,12 @@ CREATE TABLE service_record (
                                 work_description TEXT,
                                 completion_date DATE,
                                 time_spent INTEGER,
-    -- Зовнішні ключі (FK)
                                 CONSTRAINT fk_record_request FOREIGN KEY (request_id)
                                     REFERENCES service_request (id) ON DELETE CASCADE,
                                 CONSTRAINT fk_record_specialist FOREIGN KEY (specialist_id)
                                     REFERENCES specialist (id) ON DELETE CASCADE
 ) DEFAULT CHARACTER SET utf8mb4;
 
--- 4. ДОДАВАННЯ ПОЧАТКОВИХ (ДЕМОНСТРАЦІЙНИХ) ДАНИХ
-
--- 4.1. Обладнання (20 записів)
 INSERT INTO equipment (id, name, model, serial_number, status, location) VALUES
     (1, 'Верстат ЧПУ Fanuc-2000', 'Fanuc-2000', 'SN-EQ-00001', 'ACTIVE', 'Цех №1'),
     (2, 'Компресор Atlas Copco', 'Atlas Copco', 'SN-EQ-00002', 'BROKEN', 'Підвал'),
@@ -94,7 +72,6 @@ INSERT INTO equipment (id, name, model, serial_number, status, location) VALUES
     (19, 'Електротеплова гарячача плита ПВЭ-0,7', 'ПВЭ-0,7', 'SN-EQ-00019', 'ACTIVE', 'Їдальня'),
     (20, 'Промисловий пилосос Karcher WD-5', 'WD-5', 'SN-EQ-00020', 'MAINTENANCE', 'Склад');
 
--- 4.2. Фахівці (20 записів)
 INSERT INTO specialist (id, full_name, specialization, phone, availability_status) VALUES
     (1, 'Іваненко Іван', 'Механік', '+380501234567', 'AVAILABLE'),
     (2, 'Петренко Петро', 'Електрик', '+380671234567', 'BUSY'),
@@ -117,8 +94,6 @@ INSERT INTO specialist (id, full_name, specialization, phone, availability_statu
     (19, 'Панченко Валерій', 'Електрик', '+380678889900', 'BUSY'),
     (20, 'Ковальчук Максим', 'Універсал', '+380505443322', 'AVAILABLE');
 
--- 4.3. Заявки на обслуговування (20 записів)
--- Стани: NEW, DIAGNOSED, IN_PROGRESS, COMPLETED
 INSERT INTO service_request (id, equipment_id, description, priority, status, created_date) VALUES
     (1, 2, 'Не вмикається, чути сторонній шум', 'HIGH', 'NEW', '2024-01-05'),
     (2, 1, 'Планове технічне обслуговування верстата', 'LOW', 'DIAGNOSED', '2024-01-08'),
@@ -141,7 +116,6 @@ INSERT INTO service_request (id, equipment_id, description, priority, status, cr
     (19, 3, 'Не спрацьовує автоматика запуску', 'HIGH', 'IN_PROGRESS', '2024-05-13'),
     (20, 13, 'Пневмопрес не тримає тиск', 'CRITICAL', 'COMPLETED', '2024-05-20');
 
--- 4.4. Сервісні записи (20 записів)
 INSERT INTO service_record (id, request_id, specialist_id, work_description, completion_date, time_spent) VALUES
     (1, 3, 1, 'Замінено систему охолодження', '2024-01-14', 120),
     (2, 1, 2, 'Діагностика двигуна', '2024-01-09', 45),

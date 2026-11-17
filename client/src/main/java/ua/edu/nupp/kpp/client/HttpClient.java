@@ -85,8 +85,6 @@ public class HttpClient {
         return sb.toString();
     }
 
-    // ========== Equipment ==========
-
     public List<Equipment> getEquipments() throws Exception {
         String json = get("/equipment");
         return mapper.readValue(json, new TypeReference<List<Equipment>>() {});
@@ -124,8 +122,6 @@ public class HttpClient {
         post("/equipment", params);
     }
 
-    // ========== Specialist ==========
-
     public List<Specialist> getSpecialists() throws Exception {
         String json = get("/specialist");
         return mapper.readValue(json, new TypeReference<List<Specialist>>() {});
@@ -160,8 +156,6 @@ public class HttpClient {
         params.put("id", id.toString());
         post("/specialist", params);
     }
-
-    // ========== ServiceRequest ==========
 
     public List<ServiceRequest> getServiceRequests() throws Exception {
         String json = get("/service-request");
@@ -208,8 +202,6 @@ public class HttpClient {
         String json = post("/service-request", params);
         return mapper.readValue(json, ServiceRequest.class);
     }
-
-    // ========== ServiceRecord ==========
 
     public List<ServiceRecord> getServiceRecords() throws Exception {
         String json = get("/service-record");

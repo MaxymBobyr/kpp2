@@ -25,7 +25,6 @@ public class MainApp extends Application {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    // ========== Equipment Tab ==========
     private TableView<Equipment> equipmentTable = new TableView<>();
     private TextField eqNameField = new TextField();
     private TextField eqModelField = new TextField();
@@ -34,7 +33,10 @@ public class MainApp extends Application {
     private TextField eqLocationField = new TextField();
     private Long selectedEquipmentId = null;
 
-    // ========== Specialist Tab ==========
+    private ProgressBar importProgressBar = new ProgressBar(0);
+    private Label importStatusLabel = new Label("Готово до імпорту");
+    private Button importButton = new Button("Імпорт CSV");
+
     private TableView<Specialist> specialistTable = new TableView<>();
     private TextField spFullNameField = new TextField();
     private TextField spSpecField = new TextField();
@@ -42,7 +44,6 @@ public class MainApp extends Application {
     private TextField spAvailField = new TextField();
     private Long selectedSpecialistId = null;
 
-    // ========== ServiceRequest Tab ==========
     private TableView<ServiceRequest> requestTable = new TableView<>();
     private TextField srEquipmentIdField = new TextField();
     private TextField srDescField = new TextField();
@@ -51,7 +52,6 @@ public class MainApp extends Application {
     private TextField srDateField = new TextField();
     private Long selectedRequestId = null;
 
-    // ========== ServiceRecord Tab ==========
     private TableView<ServiceRecord> recordTable = new TableView<>();
     private TextField recRequestIdField = new TextField();
     private TextField recSpecialistIdField = new TextField();
@@ -81,13 +81,9 @@ public class MainApp extends Application {
         refreshAll();
     }
 
-    // =========================================================
-    // Equipment Tab
-    // =========================================================
     private Tab createEquipmentTab() {
         Tab tab = new Tab("Обладнання");
 
-        // Table
         TableColumn<Equipment, Long> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         TableColumn<Equipment, String> nameCol = new TableColumn<>("Назва");
@@ -113,7 +109,6 @@ public class MainApp extends Application {
             }
         });
 
-        // Form
         GridPane form = new GridPane();
         form.setHgap(10);
         form.setVgap(8);
@@ -124,7 +119,6 @@ public class MainApp extends Application {
         form.add(new Label("Статус:"), 0, 3); form.add(eqStatusField, 1, 3);
         form.add(new Label("Локація:"), 0, 4); form.add(eqLocationField, 1, 4);
 
-        // Buttons
         Button btnAdd = new Button("Додати");
         Button btnUpdate = new Button("Змінити");
         Button btnDelete = new Button("Видалити");
@@ -138,7 +132,15 @@ public class MainApp extends Application {
         HBox buttons = new HBox(10, btnAdd, btnUpdate, btnDelete, btnRefresh);
         buttons.setAlignment(Pos.CENTER_LEFT);
 
-        VBox left = new VBox(10, equipmentTable, buttons);
+        importButton.setOnAction(e -> startCsvImport());
+        importButton.setMaxWidth(Double.MAX_VALUE);
+        importProgressBar.setPrefWidth(220);
+        importStatusLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox importRow = new HBox(10, importButton, importProgressBar, importStatusLabel);
+        importRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(importStatusLabel, Priority.ALWAYS);
+
+        VBox left = new VBox(10, equipmentTable, buttons, importRow);
         left.setPadding(new Insets(10));
         left.setFillWidth(true);
         VBox.setVgrow(equipmentTable, Priority.ALWAYS);
@@ -210,6 +212,40 @@ public class MainApp extends Application {
         }
     }
 
+    private void startCsvImport() {
+        ImportMeasurementsTask task = new ImportMeasurementsTask(api);
+
+        importButton.setDisable(true);
+        importProgressBar.progressProperty().bind(task.progressProperty());
+        importStatusLabel.textProperty().bind(task.messageProperty());
+
+        task.setOnSucceeded(e -> {
+            int imported = task.getValue();
+            importProgressBar.progressProperty().unbind();
+            importStatusLabel.textProperty().unbind();
+            importProgressBar.setProgress(0);
+            importButton.setDisable(false);
+            refreshEquipment();
+            showInfo("Імпорт завершено", "Успішно імпортовано записів: " + imported
+                    + "\nДані оновлено з сервера.");
+        });
+
+        task.setOnFailed(e -> {
+            Throwable ex = task.getException();
+            importProgressBar.progressProperty().unbind();
+            importStatusLabel.textProperty().unbind();
+            importProgressBar.setProgress(0);
+            importStatusLabel.setText("Помилка імпорту");
+            importButton.setDisable(false);
+            showError("Помилка імпорту CSV",
+                    ex != null ? ex.getMessage() : "Невідома помилка");
+        });
+
+        Thread thread = new Thread(task, "csv-import");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
     private void clearEquipmentForm() {
         eqNameField.clear();
         eqModelField.clear();
@@ -229,9 +265,6 @@ public class MainApp extends Application {
         }
     }
 
-    // =========================================================
-    // Specialist Tab
-    // =========================================================
     private Tab createSpecialistTab() {
         Tab tab = new Tab("Фахівці");
 
@@ -367,9 +400,6 @@ public class MainApp extends Application {
         }
     }
 
-    // =========================================================
-    // ServiceRequest Tab
-    // =========================================================
     private Tab createServiceRequestTab() {
         Tab tab = new Tab("Заявки");
 
@@ -393,17 +423,10 @@ public class MainApp extends Application {
                 srEquipmentIdField.setText(String.valueOf(selected.getEquipmentId()));
                 srDescField.setText(selected.getDescription());
                 srPriorityField.setText(selected.getPriority());
-                srStateCombo.setValue(selected.getState());
+                populateAllowedStates(selected.getState());
                 srDateField.setText(selected.getCreatedDate().toString());
             }
         });
-
-        srStateCombo.getItems().addAll(
-                ServiceRequestState.NEW,
-                ServiceRequestState.DIAGNOSED,
-                ServiceRequestState.IN_PROGRESS,
-                ServiceRequestState.COMPLETED
-        );
 
         GridPane form = new GridPane();
         form.setHgap(10);
@@ -510,6 +533,22 @@ public class MainApp extends Application {
         selectedRequestId = null;
     }
 
+    private void populateAllowedStates(ServiceRequestState current) {
+        srStateCombo.getItems().clear();
+        switch (current) {
+            case NEW -> srStateCombo.getItems().add(ServiceRequestState.DIAGNOSED);
+            case DIAGNOSED -> srStateCombo.getItems().add(ServiceRequestState.IN_PROGRESS);
+            case IN_PROGRESS -> srStateCombo.getItems().add(ServiceRequestState.COMPLETED);
+            case COMPLETED -> {
+            }
+        }
+        if (!srStateCombo.getItems().isEmpty()) {
+            srStateCombo.setValue(srStateCombo.getItems().get(0));
+        } else {
+            srStateCombo.setValue(null);
+        }
+    }
+
     private void refreshServiceRequest() {
         try {
             List<ServiceRequest> list = api.getServiceRequests();
@@ -519,9 +558,6 @@ public class MainApp extends Application {
         }
     }
 
-    // =========================================================
-    // ServiceRecord Tab
-    // =========================================================
     private Tab createServiceRecordTab() {
         Tab tab = new Tab("Сервісні записи");
 
@@ -664,9 +700,6 @@ public class MainApp extends Application {
         }
     }
 
-    // =========================================================
-    // Refresh All
-    // =========================================================
     private void refreshAll() {
         refreshEquipment();
         refreshSpecialist();
@@ -674,11 +707,16 @@ public class MainApp extends Application {
         refreshServiceRecord();
     }
 
-    // =========================================================
-    // Error Dialog
-    // =========================================================
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

@@ -29,6 +29,17 @@ public class ServiceRequestService {
     public void update(ServiceRequest request) throws SQLException {
         validate(request);
         requireEquipment(request.getEquipmentId());
+        if (request.getId() != null) {
+            ServiceRequest current = dao.getById(request.getId());
+            if (current != null
+                    && current.getState() != null
+                    && request.getState() != null
+                    && current.getState() != request.getState()
+                    && !isAllowedTransition(current.getState(), request.getState())) {
+                LOG.warning("Недопустимий перехід стану (update): " + current.getState() + " -> " + request.getState());
+                throw new IllegalArgumentException("Недопустимий перехід стану");
+            }
+        }
         dao.update(request);
         LOG.info("Оновлено заявку на обслуговування");
     }
@@ -38,21 +49,12 @@ public class ServiceRequestService {
         LOG.info("Видалено заявку на обслуговування");
     }
 
-    /**
-     * Перевіряє, чи дозволений перехід стану життєвого циклу.
-     * Дозволені лише послідовні переходи:
-     * NEW → DIAGNOSED → IN_PROGRESS → COMPLETED
-     */
     public static boolean isAllowedTransition(ServiceRequestState from, ServiceRequestState to) {
         return (from == ServiceRequestState.NEW && to == ServiceRequestState.DIAGNOSED)
             || (from == ServiceRequestState.DIAGNOSED && to == ServiceRequestState.IN_PROGRESS)
             || (from == ServiceRequestState.IN_PROGRESS && to == ServiceRequestState.COMPLETED);
     }
 
-    /**
-     * Змінює стан заявки з перевіркою допустимості переходу.
-     * Якщо об'єкт не знайдено або перехід заборонений — IllegalArgumentException.
-     */
     public void changeState(long id, ServiceRequestState next) throws SQLException {
         ServiceRequest current = dao.getById(id);
 
