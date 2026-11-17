@@ -51,6 +51,7 @@ public class MainApp extends Application {
     private ComboBox<ServiceRequestState> srStateCombo = new ComboBox<>();
     private TextField srDateField = new TextField();
     private Long selectedRequestId = null;
+    private ServiceRequestState comboCurrentState = null;
 
     private TableView<ServiceRecord> recordTable = new TableView<>();
     private TextField recRequestIdField = new TextField();
@@ -241,6 +242,14 @@ public class MainApp extends Application {
                     ex != null ? ex.getMessage() : "Невідома помилка");
         });
 
+        task.setOnCancelled(e -> {
+            importProgressBar.progressProperty().unbind();
+            importStatusLabel.textProperty().unbind();
+            importProgressBar.setProgress(0);
+            importStatusLabel.setText("Імпорт скасовано");
+            importButton.setDisable(false);
+        });
+
         Thread thread = new Thread(task, "csv-import");
         thread.setDaemon(true);
         thread.start();
@@ -417,6 +426,37 @@ public class MainApp extends Application {
         dateCol.setCellValueFactory(new PropertyValueFactory<>("createdDate"));
 
         requestTable.getColumns().addAll(idCol, equipCol, descCol, prioCol, stateCol, dateCol);
+        srStateCombo.setCellFactory(list -> new ListCell<ServiceRequestState>() {
+            @Override
+            protected void updateItem(ServiceRequestState item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setDisable(false);
+                } else {
+                    setText(item.toString());
+                    boolean enabled = isComboItemEnabled(comboCurrentState, item);
+                    setDisable(!enabled);
+                    if (!enabled) {
+                        setStyle("-fx-opacity: 0.5;");
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
+        srStateCombo.setButtonCell(new ListCell<ServiceRequestState>() {
+            @Override
+            protected void updateItem(ServiceRequestState item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.toString());
+                }
+            }
+        });
+
         requestTable.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
             if (selected != null) {
                 selectedRequestId = selected.getId();
@@ -534,19 +574,23 @@ public class MainApp extends Application {
     }
 
     private void populateAllowedStates(ServiceRequestState current) {
-        srStateCombo.getItems().clear();
-        switch (current) {
-            case NEW -> srStateCombo.getItems().add(ServiceRequestState.DIAGNOSED);
-            case DIAGNOSED -> srStateCombo.getItems().add(ServiceRequestState.IN_PROGRESS);
-            case IN_PROGRESS -> srStateCombo.getItems().add(ServiceRequestState.COMPLETED);
-            case COMPLETED -> {
-            }
+        comboCurrentState = current;
+        srStateCombo.getItems().setAll(
+            ServiceRequestState.NEW,
+            ServiceRequestState.DIAGNOSED,
+            ServiceRequestState.IN_PROGRESS,
+            ServiceRequestState.COMPLETED
+        );
+        srStateCombo.setValue(current);
+    }
+
+    private boolean isComboItemEnabled(ServiceRequestState current, ServiceRequestState candidate) {
+        if (candidate == current) {
+            return true;
         }
-        if (!srStateCombo.getItems().isEmpty()) {
-            srStateCombo.setValue(srStateCombo.getItems().get(0));
-        } else {
-            srStateCombo.setValue(null);
-        }
+        return (current == ServiceRequestState.NEW && candidate == ServiceRequestState.DIAGNOSED)
+            || (current == ServiceRequestState.DIAGNOSED && candidate == ServiceRequestState.IN_PROGRESS)
+            || (current == ServiceRequestState.IN_PROGRESS && candidate == ServiceRequestState.COMPLETED);
     }
 
     private void refreshServiceRequest() {

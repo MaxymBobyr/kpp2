@@ -55,13 +55,20 @@ public class ImportMeasurementsTask extends Task<Integer> {
         }
 
         List<String> dataLines = lines.subList(1, lines.size());
-        int total = dataLines.size();
+        int total = 0;
+        for (String line : dataLines) {
+            if (line != null && !line.isBlank()) {
+                total++;
+            }
+        }
 
         int processed = 0;
         int imported = 0;
         int skippedFormat = 0;
         int failedHttp = 0;
+        int skippedDuplicate = 0;
 
+        LOG.info("Початок CSV-імпорту: " + csvPath);
         updateMessage("Імпорт: 0 з " + total + " рядків");
 
         for (String line : dataLines) {
@@ -70,16 +77,16 @@ public class ImportMeasurementsTask extends Task<Integer> {
                 return imported;
             }
 
-            processed++;
-
             if (line == null || line.isBlank()) {
                 skippedFormat++;
-                logSkip(processed, "порожній рядок");
+                logSkip(null, "порожній рядок");
                 updateProgress(processed, total);
                 updateMessage("Імпорт: " + processed + " з " + total
                         + " (імпортовано " + imported + ", пропущено " + skippedFormat + ")");
                 continue;
             }
+
+            processed++;
 
             Optional<Equipment> parsed = parseRow(line);
             if (parsed.isEmpty()) {
@@ -94,20 +101,27 @@ public class ImportMeasurementsTask extends Task<Integer> {
                 client.addEquipment(parsed.get());
                 imported++;
             } catch (Exception e) {
-                failedHttp++;
-                LOG.warning("CSV: рядок " + processed + " відхилено сервером: " + e.getMessage());
+                String msg = e.getMessage() != null ? e.getMessage() : "";
+                if (msg.contains("Дублікат")) {
+                    skippedDuplicate++;
+                    LOG.warning("CSV: рядок " + processed + " пропущено (дублікат серійного номера): " + e.getMessage());
+                } else {
+                    failedHttp++;
+                    LOG.warning("CSV: рядок " + processed + " відхилено сервером: " + e.getMessage());
+                }
             }
 
             updateProgress(processed, total);
             updateMessage("Імпорт: " + processed + " з " + total
                     + " (імпортовано " + imported + ", пропущено " + skippedFormat
-                    + ", помилок " + failedHttp + ")");
+                    + ", дублікатів " + skippedDuplicate + ", помилок " + failedHttp + ")");
         }
 
         updateMessage("Імпорт завершено: імпортовано " + imported
-                + " з " + total + " (пропущено " + skippedFormat + ", помилок " + failedHttp + ")");
+                + " з " + total + " (пропущено " + skippedFormat + ", дублікатів " + skippedDuplicate
+                + ", помилок " + failedHttp + ")");
         LOG.info("CSV-імпорт завершено: imported=" + imported + ", skippedFormat=" + skippedFormat
-                + ", failedHttp=" + failedHttp + ", total=" + total);
+                + ", skippedDuplicate=" + skippedDuplicate + ", failedHttp=" + failedHttp + ", total=" + total);
         return imported;
     }
 

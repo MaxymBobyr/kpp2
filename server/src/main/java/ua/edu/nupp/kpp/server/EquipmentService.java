@@ -20,6 +20,10 @@ public class EquipmentService {
 
     public void add(Equipment equipment) throws SQLException {
         validate(equipment);
+        Equipment existing = dao.findBySerialNumber(equipment.getSerialNumber());
+        if (existing != null) {
+            throw new IllegalArgumentException("Дублікат: обладнання з серійним номером " + equipment.getSerialNumber() + " уже існує");
+        }
         dao.add(equipment);
         LOG.info("Додано обладнання");
     }

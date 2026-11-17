@@ -49,6 +49,21 @@ public class EquipmentDAO {
         return null;
     }
 
+    public Equipment findBySerialNumber(String serialNumber) {
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement("SELECT id, name, model, serial_number, status, location FROM equipment WHERE serial_number = ?")) {
+            ps.setString(1, serialNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
     public void add(Equipment equipment) {
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(SQL_INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
