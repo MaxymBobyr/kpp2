@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>server</artifactId>
+    <artifactId>equipment-server</artifactId>
     <packaging>war</packaging>
 
     <properties>
@@ -56,7 +56,7 @@
     </dependencies>
 
     <build>
-        <finalName>server</finalName>
+        <finalName>equipment-server</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

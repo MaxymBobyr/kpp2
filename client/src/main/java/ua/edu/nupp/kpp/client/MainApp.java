@@ -2,6 +2,7 @@ package ua.edu.nupp.kpp.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Application;
@@ -16,6 +17,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class MainApp extends Application {
@@ -23,13 +25,14 @@ public class MainApp extends Application {
     private final HttpClient api = new HttpClient();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private TableView<Equipment> equipmentTable = new TableView<>();
     private TextField eqNameField = new TextField();
     private TextField eqModelField = new TextField();
     private TextField eqSerialField = new TextField();
-    private TextField eqStatusField = new TextField();
+    private ComboBox<String> eqStatusCombo = new ComboBox<>();
     private TextField eqLocationField = new TextField();
     private Long selectedEquipmentId = null;
 
@@ -41,13 +44,16 @@ public class MainApp extends Application {
     private TextField spFullNameField = new TextField();
     private TextField spSpecField = new TextField();
     private TextField spPhoneField = new TextField();
-    private TextField spAvailField = new TextField();
+    private ComboBox<String> spAvailField = new ComboBox<>();
     private Long selectedSpecialistId = null;
 
     private TableView<ServiceRequest> requestTable = new TableView<>();
     private TextField srEquipmentIdField = new TextField();
     private TextField srDescField = new TextField();
-    private TextField srPriorityField = new TextField();
+    private TextField srF1Field = new TextField();
+    private TextField srF2Field = new TextField();
+    private TextField srF3Field = new TextField();
+    private TextField srIntegralIndicatorField = new TextField();
     private ComboBox<ServiceRequestState> srStateCombo = new ComboBox<>();
     private TextField srDateField = new TextField();
     private Long selectedRequestId = null;
@@ -87,16 +93,22 @@ public class MainApp extends Application {
 
         TableColumn<Equipment, Long> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setPrefWidth(40);
         TableColumn<Equipment, String> nameCol = new TableColumn<>("Назва");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameCol.setPrefWidth(200);
         TableColumn<Equipment, String> modelCol = new TableColumn<>("Модель");
         modelCol.setCellValueFactory(new PropertyValueFactory<>("model"));
+        modelCol.setPrefWidth(100);
         TableColumn<Equipment, String> serialCol = new TableColumn<>("Серійний №");
         serialCol.setCellValueFactory(new PropertyValueFactory<>("serialNumber"));
+        serialCol.setPrefWidth(120);
         TableColumn<Equipment, String> statusCol = new TableColumn<>("Статус");
         statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
+        statusCol.setPrefWidth(100);
         TableColumn<Equipment, String> locCol = new TableColumn<>("Локація");
         locCol.setCellValueFactory(new PropertyValueFactory<>("location"));
+        locCol.setPrefWidth(150);
 
         equipmentTable.getColumns().addAll(idCol, nameCol, modelCol, serialCol, statusCol, locCol);
         equipmentTable.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
@@ -105,20 +117,27 @@ public class MainApp extends Application {
                 eqNameField.setText(selected.getName());
                 eqModelField.setText(selected.getModel());
                 eqSerialField.setText(selected.getSerialNumber());
-                eqStatusField.setText(selected.getStatus());
+                eqStatusCombo.setValue(selected.getStatus());
                 eqLocationField.setText(selected.getLocation());
             }
         });
+
+        eqStatusCombo.getItems().addAll("ACTIVE", "BROKEN", "MAINTENANCE");
 
         GridPane form = new GridPane();
         form.setHgap(10);
         form.setVgap(8);
         form.setPadding(new Insets(10));
         form.add(new Label("Назва:"), 0, 0); form.add(eqNameField, 1, 0);
+        eqNameField.setPrefWidth(200);
         form.add(new Label("Модель:"), 0, 1); form.add(eqModelField, 1, 1);
+        eqModelField.setPrefWidth(100);
         form.add(new Label("Серійний №:"), 0, 2); form.add(eqSerialField, 1, 2);
-        form.add(new Label("Статус:"), 0, 3); form.add(eqStatusField, 1, 3);
+        eqSerialField.setPrefWidth(120);
+        form.add(new Label("Статус:"), 0, 3); form.add(eqStatusCombo, 1, 3);
+        eqStatusCombo.setPrefWidth(100);
         form.add(new Label("Локація:"), 0, 4); form.add(eqLocationField, 1, 4);
+        eqLocationField.setPrefWidth(150);
 
         Button btnAdd = new Button("Додати");
         Button btnUpdate = new Button("Змінити");
@@ -133,15 +152,7 @@ public class MainApp extends Application {
         HBox buttons = new HBox(10, btnAdd, btnUpdate, btnDelete, btnRefresh);
         buttons.setAlignment(Pos.CENTER_LEFT);
 
-        importButton.setOnAction(e -> startCsvImport());
-        importButton.setMaxWidth(Double.MAX_VALUE);
-        importProgressBar.setPrefWidth(220);
-        importStatusLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox importRow = new HBox(10, importButton, importProgressBar, importStatusLabel);
-        importRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(importStatusLabel, Priority.ALWAYS);
-
-        VBox left = new VBox(10, equipmentTable, buttons, importRow);
+        VBox left = new VBox(10, equipmentTable, buttons);
         left.setPadding(new Insets(10));
         left.setFillWidth(true);
         VBox.setVgrow(equipmentTable, Priority.ALWAYS);
@@ -164,7 +175,7 @@ public class MainApp extends Application {
                     eqNameField.getText(),
                     eqModelField.getText(),
                     eqSerialField.getText(),
-                    eqStatusField.getText(),
+                    eqStatusCombo.getValue(),
                     eqLocationField.getText()
             );
             api.addEquipment(e);
@@ -186,7 +197,7 @@ public class MainApp extends Application {
                     eqNameField.getText(),
                     eqModelField.getText(),
                     eqSerialField.getText(),
-                    eqStatusField.getText(),
+                    eqStatusCombo.getValue(),
                     eqLocationField.getText()
             );
             api.updateEquipment(e);
@@ -214,7 +225,7 @@ public class MainApp extends Application {
     }
 
     private void startCsvImport() {
-        ImportMeasurementsTask task = new ImportMeasurementsTask(api);
+        ImportServiceRequestsTask task = new ImportServiceRequestsTask(api);
 
         importButton.setDisable(true);
         importProgressBar.progressProperty().bind(task.progressProperty());
@@ -226,7 +237,7 @@ public class MainApp extends Application {
             importStatusLabel.textProperty().unbind();
             importProgressBar.setProgress(0);
             importButton.setDisable(false);
-            refreshEquipment();
+            refreshServiceRequest();
             showInfo("Імпорт завершено", "Успішно імпортовано записів: " + imported
                     + "\nДані оновлено з сервера.");
         });
@@ -259,7 +270,7 @@ public class MainApp extends Application {
         eqNameField.clear();
         eqModelField.clear();
         eqSerialField.clear();
-        eqStatusField.clear();
+        eqStatusCombo.setValue(null);
         eqLocationField.clear();
         equipmentTable.getSelectionModel().clearSelection();
         selectedEquipmentId = null;
@@ -279,14 +290,19 @@ public class MainApp extends Application {
 
         TableColumn<Specialist, Long> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setPrefWidth(40);
         TableColumn<Specialist, String> nameCol = new TableColumn<>("ПІБ");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("fullName"));
+        nameCol.setPrefWidth(150);
         TableColumn<Specialist, String> specCol = new TableColumn<>("Спеціалізація");
         specCol.setCellValueFactory(new PropertyValueFactory<>("specialization"));
+        specCol.setPrefWidth(120);
         TableColumn<Specialist, String> phoneCol = new TableColumn<>("Телефон");
         phoneCol.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        phoneCol.setPrefWidth(120);
         TableColumn<Specialist, String> availCol = new TableColumn<>("Статус");
         availCol.setCellValueFactory(new PropertyValueFactory<>("availabilityStatus"));
+        availCol.setPrefWidth(100);
 
         specialistTable.getColumns().addAll(idCol, nameCol, specCol, phoneCol, availCol);
         specialistTable.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
@@ -295,18 +311,24 @@ public class MainApp extends Application {
                 spFullNameField.setText(selected.getFullName());
                 spSpecField.setText(selected.getSpecialization());
                 spPhoneField.setText(selected.getPhone());
-                spAvailField.setText(selected.getAvailabilityStatus());
+                spAvailField.setValue(selected.getAvailabilityStatus());
             }
         });
+
+        spAvailField.getItems().addAll("AVAILABLE", "BUSY");
 
         GridPane form = new GridPane();
         form.setHgap(10);
         form.setVgap(8);
         form.setPadding(new Insets(10));
         form.add(new Label("ПІБ:"), 0, 0); form.add(spFullNameField, 1, 0);
+        spFullNameField.setPrefWidth(150);
         form.add(new Label("Спеціалізація:"), 0, 1); form.add(spSpecField, 1, 1);
+        spSpecField.setPrefWidth(120);
         form.add(new Label("Телефон:"), 0, 2); form.add(spPhoneField, 1, 2);
+        spPhoneField.setPrefWidth(120);
         form.add(new Label("Статус:"), 0, 3); form.add(spAvailField, 1, 3);
+        spAvailField.setPrefWidth(100);
 
         Button btnAdd = new Button("Додати");
         Button btnUpdate = new Button("Змінити");
@@ -344,7 +366,7 @@ public class MainApp extends Application {
                     spFullNameField.getText(),
                     spSpecField.getText(),
                     spPhoneField.getText(),
-                    spAvailField.getText()
+                    spAvailField.getValue()
             );
             api.addSpecialist(s);
             clearSpecialistForm();
@@ -365,7 +387,7 @@ public class MainApp extends Application {
                     spFullNameField.getText(),
                     spSpecField.getText(),
                     spPhoneField.getText(),
-                    spAvailField.getText()
+                    spAvailField.getValue()
             );
             api.updateSpecialist(s);
             selectedSpecialistId = null;
@@ -395,7 +417,7 @@ public class MainApp extends Application {
         spFullNameField.clear();
         spSpecField.clear();
         spPhoneField.clear();
-        spAvailField.clear();
+        spAvailField.setValue(null);
         specialistTable.getSelectionModel().clearSelection();
         selectedSpecialistId = null;
     }
@@ -414,18 +436,34 @@ public class MainApp extends Application {
 
         TableColumn<ServiceRequest, Long> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setPrefWidth(40);
         TableColumn<ServiceRequest, Long> equipCol = new TableColumn<>("Обладнання ID");
         equipCol.setCellValueFactory(new PropertyValueFactory<>("equipmentId"));
+        equipCol.setPrefWidth(100);
         TableColumn<ServiceRequest, String> descCol = new TableColumn<>("Опис");
         descCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        TableColumn<ServiceRequest, String> prioCol = new TableColumn<>("Пріоритет");
-        prioCol.setCellValueFactory(new PropertyValueFactory<>("priority"));
+        descCol.setPrefWidth(200);
+        TableColumn<ServiceRequest, String> f1Col = new TableColumn<>("F1");
+        f1Col.setCellValueFactory(new PropertyValueFactory<>("f1"));
+        f1Col.setPrefWidth(50);
+        TableColumn<ServiceRequest, String> f2Col = new TableColumn<>("F2");
+        f2Col.setCellValueFactory(new PropertyValueFactory<>("f2"));
+        f2Col.setPrefWidth(50);
+        TableColumn<ServiceRequest, String> f3Col = new TableColumn<>("F3");
+        f3Col.setCellValueFactory(new PropertyValueFactory<>("f3"));
+        f3Col.setPrefWidth(50);
+        TableColumn<ServiceRequest, String> integralCol = new TableColumn<>("I");
+        integralCol.setCellValueFactory(new PropertyValueFactory<>("integralIndicator"));
+        integralCol.setPrefWidth(60);
         TableColumn<ServiceRequest, ServiceRequestState> stateCol = new TableColumn<>("Стан");
         stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
+        stateCol.setPrefWidth(100);
         TableColumn<ServiceRequest, String> dateCol = new TableColumn<>("Дата");
         dateCol.setCellValueFactory(new PropertyValueFactory<>("createdDate"));
+        dateCol.setPrefWidth(100);
 
-        requestTable.getColumns().addAll(idCol, equipCol, descCol, prioCol, stateCol, dateCol);
+        requestTable.getColumns().addAll(idCol, equipCol, descCol, f1Col, f2Col, f3Col, integralCol, stateCol, dateCol);
+
         srStateCombo.setCellFactory(list -> new ListCell<ServiceRequestState>() {
             @Override
             protected void updateItem(ServiceRequestState item, boolean empty) {
@@ -462,7 +500,10 @@ public class MainApp extends Application {
                 selectedRequestId = selected.getId();
                 srEquipmentIdField.setText(String.valueOf(selected.getEquipmentId()));
                 srDescField.setText(selected.getDescription());
-                srPriorityField.setText(selected.getPriority());
+                srF1Field.setText(String.valueOf(selected.getF1()));
+                srF2Field.setText(String.valueOf(selected.getF2()));
+                srF3Field.setText(String.valueOf(selected.getF3()));
+                srIntegralIndicatorField.setText(String.valueOf(selected.getIntegralIndicator()));
                 populateAllowedStates(selected.getState());
                 srDateField.setText(selected.getCreatedDate().toString());
             }
@@ -473,10 +514,21 @@ public class MainApp extends Application {
         form.setVgap(8);
         form.setPadding(new Insets(10));
         form.add(new Label("Обладнання ID:"), 0, 0); form.add(srEquipmentIdField, 1, 0);
+        srEquipmentIdField.setPrefWidth(100);
         form.add(new Label("Опис:"), 0, 1); form.add(srDescField, 1, 1);
-        form.add(new Label("Пріоритет:"), 0, 2); form.add(srPriorityField, 1, 2);
-        form.add(new Label("Стан:"), 0, 3); form.add(srStateCombo, 1, 3);
-        form.add(new Label("Дата (YYYY-MM-DD):"), 0, 4); form.add(srDateField, 1, 4);
+        srDescField.setPrefWidth(200);
+        form.add(new Label("F1 (критичність):"), 0, 2); form.add(srF1Field, 1, 2);
+        srF1Field.setPrefWidth(50);
+        form.add(new Label("F2 (тяжкість несправності):"), 0, 3); form.add(srF2Field, 1, 3);
+        srF2Field.setPrefWidth(50);
+        form.add(new Label("F3 (вплив простою):"), 0, 4); form.add(srF3Field, 1, 4);
+        srF3Field.setPrefWidth(50);
+        form.add(new Label("I:"), 0, 5); form.add(srIntegralIndicatorField, 1, 5);
+        srIntegralIndicatorField.setPrefWidth(60);
+        form.add(new Label("Стан:"), 0, 6); form.add(srStateCombo, 1, 6);
+        srStateCombo.setPrefWidth(100);
+        form.add(new Label("Дата (YYYY-MM-DD):"), 0, 7); form.add(srDateField, 1, 7);
+        srDateField.setPrefWidth(100);
 
         Button btnAdd = new Button("Додати");
         Button btnUpdate = new Button("Змінити");
@@ -491,7 +543,15 @@ public class MainApp extends Application {
         HBox buttons = new HBox(10, btnAdd, btnUpdate, btnDelete, btnRefresh);
         buttons.setAlignment(Pos.CENTER_LEFT);
 
-        VBox left = new VBox(10, requestTable, buttons);
+        importButton.setOnAction(e -> startCsvImport());
+        importButton.setMaxWidth(Double.MAX_VALUE);
+        importProgressBar.setPrefWidth(220);
+        importStatusLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox importRow = new HBox(10, importButton, importProgressBar, importStatusLabel);
+        importRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(importStatusLabel, Priority.ALWAYS);
+
+        VBox left = new VBox(10, requestTable, buttons, importRow);
         left.setPadding(new Insets(10));
         left.setFillWidth(true);
         VBox.setVgrow(requestTable, Priority.ALWAYS);
@@ -513,7 +573,10 @@ public class MainApp extends Application {
                     null,
                     Long.parseLong(srEquipmentIdField.getText()),
                     srDescField.getText(),
-                    srPriorityField.getText(),
+                    Double.parseDouble(srF1Field.getText()),
+                    Double.parseDouble(srF2Field.getText()),
+                    Double.parseDouble(srF3Field.getText()),
+                    0,
                     srStateCombo.getValue(),
                     java.time.LocalDate.parse(srDateField.getText())
             );
@@ -535,7 +598,10 @@ public class MainApp extends Application {
                     selectedRequestId,
                     Long.parseLong(srEquipmentIdField.getText()),
                     srDescField.getText(),
-                    srPriorityField.getText(),
+                    Double.parseDouble(srF1Field.getText()),
+                    Double.parseDouble(srF2Field.getText()),
+                    Double.parseDouble(srF3Field.getText()),
+                    0,
                     srStateCombo.getValue(),
                     java.time.LocalDate.parse(srDateField.getText())
             );
@@ -566,7 +632,10 @@ public class MainApp extends Application {
     private void clearServiceRequestForm() {
         srEquipmentIdField.clear();
         srDescField.clear();
-        srPriorityField.clear();
+        srF1Field.clear();
+        srF2Field.clear();
+        srF3Field.clear();
+        srIntegralIndicatorField.clear();
         srStateCombo.setValue(null);
         srDateField.clear();
         requestTable.getSelectionModel().clearSelection();
@@ -607,16 +676,22 @@ public class MainApp extends Application {
 
         TableColumn<ServiceRecord, Long> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idCol.setPrefWidth(40);
         TableColumn<ServiceRecord, Long> reqCol = new TableColumn<>("Заявка ID");
         reqCol.setCellValueFactory(new PropertyValueFactory<>("requestId"));
+        reqCol.setPrefWidth(100);
         TableColumn<ServiceRecord, Long> specCol = new TableColumn<>("Фахівець ID");
         specCol.setCellValueFactory(new PropertyValueFactory<>("specialistId"));
+        specCol.setPrefWidth(100);
         TableColumn<ServiceRecord, String> workCol = new TableColumn<>("Робота");
         workCol.setCellValueFactory(new PropertyValueFactory<>("workDescription"));
+        workCol.setPrefWidth(200);
         TableColumn<ServiceRecord, String> dateCol = new TableColumn<>("Дата завершення");
         dateCol.setCellValueFactory(new PropertyValueFactory<>("completionDate"));
+        dateCol.setPrefWidth(120);
         TableColumn<ServiceRecord, Integer> timeCol = new TableColumn<>("Час (хв)");
         timeCol.setCellValueFactory(new PropertyValueFactory<>("timeSpent"));
+        timeCol.setPrefWidth(80);
 
         recordTable.getColumns().addAll(idCol, reqCol, specCol, workCol, dateCol, timeCol);
         recordTable.getSelectionModel().selectedItemProperty().addListener((obs, old, selected) -> {
@@ -635,10 +710,15 @@ public class MainApp extends Application {
         form.setVgap(8);
         form.setPadding(new Insets(10));
         form.add(new Label("Заявка ID:"), 0, 0); form.add(recRequestIdField, 1, 0);
-        form.add(new Label("Фахівець ID:"), 0, 1); form.add(recSpecialistIdField, 1, 1);
+        recRequestIdField.setPrefWidth(100);
+        form.add(new Label("Фахівце ID:"), 0, 1); form.add(recSpecialistIdField, 1, 1);
+        recSpecialistIdField.setPrefWidth(100);
         form.add(new Label("Робота:"), 0, 2); form.add(recWorkField, 1, 2);
+        recWorkField.setPrefWidth(200);
         form.add(new Label("Дата (YYYY-MM-DD):"), 0, 3); form.add(recDateField, 1, 3);
+        recDateField.setPrefWidth(120);
         form.add(new Label("Час (хв):"), 0, 4); form.add(recTimeField, 1, 4);
+        recTimeField.setPrefWidth(80);
 
         Button btnAdd = new Button("Додати");
         Button btnUpdate = new Button("Змінити");

@@ -11,13 +11,13 @@ import java.util.List;
 public class ServiceRequestDAO {
 
     private static final String SQL_FIND_ALL =
-        "SELECT id, equipment_id, description, priority, status, created_date FROM service_request ORDER BY id";
+        "SELECT id, equipment_id, description, f1, f2, f3, integral_indicator, status, created_date FROM service_request ORDER BY id";
     private static final String SQL_FIND_BY_ID =
-        "SELECT id, equipment_id, description, priority, status, created_date FROM service_request WHERE id = ?";
+        "SELECT id, equipment_id, description, f1, f2, f3, integral_indicator, status, created_date FROM service_request WHERE id = ?";
     private static final String SQL_INSERT =
-        "INSERT INTO service_request (equipment_id, description, priority, status, created_date) VALUES (?, ?, ?, ?, ?)";
+        "INSERT INTO service_request (equipment_id, description, f1, f2, f3, integral_indicator, status, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE =
-        "UPDATE service_request SET equipment_id = ?, description = ?, priority = ?, status = ?, created_date = ? WHERE id = ?";
+        "UPDATE service_request SET equipment_id = ?, description = ?, f1 = ?, f2 = ?, f3 = ?, integral_indicator = ?, status = ?, created_date = ? WHERE id = ?";
     private static final String SQL_DELETE =
         "DELETE FROM service_request WHERE id = ?";
 
@@ -55,9 +55,12 @@ public class ServiceRequestDAO {
              PreparedStatement ps = c.prepareStatement(SQL_INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, request.getEquipmentId());
             ps.setString(2, request.getDescription());
-            ps.setString(3, request.getPriority());
-            ps.setString(4, request.getState() != null ? request.getState().name() : null);
-            ps.setDate(5, java.sql.Date.valueOf(request.getCreatedDate()));
+            ps.setDouble(3, request.getF1());
+            ps.setDouble(4, request.getF2());
+            ps.setDouble(5, request.getF3());
+            ps.setDouble(6, request.getIntegralIndicator());
+            ps.setString(7, request.getState() != null ? request.getState().name() : null);
+            ps.setDate(8, java.sql.Date.valueOf(request.getCreatedDate()));
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -74,10 +77,13 @@ public class ServiceRequestDAO {
              PreparedStatement ps = c.prepareStatement(SQL_UPDATE)) {
             ps.setLong(1, request.getEquipmentId());
             ps.setString(2, request.getDescription());
-            ps.setString(3, request.getPriority());
-            ps.setString(4, request.getState() != null ? request.getState().name() : null);
-            ps.setDate(5, java.sql.Date.valueOf(request.getCreatedDate()));
-            ps.setLong(6, request.getId());
+            ps.setDouble(3, request.getF1());
+            ps.setDouble(4, request.getF2());
+            ps.setDouble(5, request.getF3());
+            ps.setDouble(6, request.getIntegralIndicator());
+            ps.setString(7, request.getState() != null ? request.getState().name() : null);
+            ps.setDate(8, java.sql.Date.valueOf(request.getCreatedDate()));
+            ps.setLong(9, request.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -110,7 +116,10 @@ public class ServiceRequestDAO {
         r.setId(rs.getLong("id"));
         r.setEquipmentId(rs.getLong("equipment_id"));
         r.setDescription(rs.getString("description"));
-        r.setPriority(rs.getString("priority"));
+        r.setF1(rs.getDouble("f1"));
+        r.setF2(rs.getDouble("f2"));
+        r.setF3(rs.getDouble("f3"));
+        r.setIntegralIndicator(rs.getDouble("integral_indicator"));
         String state = rs.getString("status");
         r.setState(state != null ? ServiceRequestState.valueOf(state) : null);
         java.sql.Date d = rs.getDate("created_date");

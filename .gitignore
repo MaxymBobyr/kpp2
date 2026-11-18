@@ -1,4 +1,4 @@
-# --- Maven ---
+
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -10,7 +10,11 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 ~$яснювальна_записка_КПП_варіант_3.docx
-# --- IntelliJ IDEA ---
+run.bat
+run.ps1
+redeploy.bat
+Пояснювальна_записка_КПП_варіант_3.docx
+
 .idea/
 *.iws
 *.iml
@@ -18,15 +22,12 @@ buildNumber.properties
 out/
 !/.mvn/wrapper/maven-wrapper.jar
 
-# --- Логи ---
 *.log
 logs/
 
-# --- Локальні конфігурації ---
 *.properties
 *.env
 local_config.json
 
-# --- Файли операційної системи ---
 .DS_Store
 Thumbs.db

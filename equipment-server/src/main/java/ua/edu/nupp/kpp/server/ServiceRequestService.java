@@ -22,6 +22,7 @@ public class ServiceRequestService {
     public void add(ServiceRequest request) throws SQLException {
         validate(request);
         requireEquipment(request.getEquipmentId());
+        request.setIntegralIndicator(calculateIntegralIndicator(request.getF1(), request.getF2(), request.getF3()));
         dao.add(request);
         LOG.info("Додано заявку на обслуговування");
     }
@@ -29,6 +30,7 @@ public class ServiceRequestService {
     public void update(ServiceRequest request) throws SQLException {
         validate(request);
         requireEquipment(request.getEquipmentId());
+        request.setIntegralIndicator(calculateIntegralIndicator(request.getF1(), request.getF2(), request.getF3()));
         if (request.getId() != null) {
             ServiceRequest current = dao.getById(request.getId());
             if (current != null
@@ -71,6 +73,10 @@ public class ServiceRequestService {
         LOG.info("Змінено стан заявки: " + current.getState() + " -> " + next);
     }
 
+    public double calculateIntegralIndicator(double f1, double f2, double f3) {
+        return RiskCalculator.calculate(f1, f2, f3);
+    }
+
     private void validate(ServiceRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Заявку не може бути null");
@@ -78,8 +84,14 @@ public class ServiceRequestService {
         if (blank(request.getDescription())) {
             throw new IllegalArgumentException("Поле description є обов'язковим");
         }
-        if (blank(request.getPriority())) {
-            throw new IllegalArgumentException("Поле priority є обов'язковим");
+        if (request.getF1() < 0 || request.getF1() > 100) {
+            throw new IllegalArgumentException("F1 має бути в діапазоні 0..100");
+        }
+        if (request.getF2() < 0 || request.getF2() > 100) {
+            throw new IllegalArgumentException("F2 має бути в діапазоні 0..100");
+        }
+        if (request.getF3() < 0 || request.getF3() > 100) {
+            throw new IllegalArgumentException("F3 має бути в діапазоні 0..100");
         }
         if (request.getState() == null) {
             throw new IllegalArgumentException("Поле state є обов'язковим");

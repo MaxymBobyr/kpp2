@@ -1,5 +1,6 @@
 package ua.edu.nupp.kpp.server;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -8,21 +9,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 
-public class ServiceRequestServlet extends HttpServlet {
+public class EquipmentServlet extends HttpServlet {
 
-    private final ServiceRequestService service = new ServiceRequestService();
+    private final EquipmentService service = new EquipmentService();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json;charset=UTF-8");
         try {
-            List<ServiceRequest> list = service.getAll();
+            List<Equipment> list = service.getAll();
             mapper.writeValue(resp.getWriter(), list);
         } catch (RuntimeException e) {
             writeError(resp, 500, e.getMessage());
@@ -38,38 +39,32 @@ public class ServiceRequestServlet extends HttpServlet {
 
         try {
             if ("add".equals(action)) {
-                ServiceRequest r = new ServiceRequest(
+                Equipment e = new Equipment(
                         null,
-                        Long.parseLong(req.getParameter("equipmentId")),
-                        req.getParameter("description"),
-                        req.getParameter("priority"),
-                        ServiceRequestState.valueOf(req.getParameter("state")),
-                        LocalDate.parse(req.getParameter("createdDate"))
+                        req.getParameter("name"),
+                        req.getParameter("model"),
+                        req.getParameter("serialNumber"),
+                        req.getParameter("status"),
+                        req.getParameter("location")
                 );
-                service.add(r);
-                writeJson(resp, r);
+                service.add(e);
+                writeJson(resp, e);
             } else if ("update".equals(action)) {
                 Long id = Long.parseLong(req.getParameter("id"));
-                ServiceRequest r = new ServiceRequest(
+                Equipment e = new Equipment(
                         id,
-                        Long.parseLong(req.getParameter("equipmentId")),
-                        req.getParameter("description"),
-                        req.getParameter("priority"),
-                        ServiceRequestState.valueOf(req.getParameter("state")),
-                        LocalDate.parse(req.getParameter("createdDate"))
+                        req.getParameter("name"),
+                        req.getParameter("model"),
+                        req.getParameter("serialNumber"),
+                        req.getParameter("status"),
+                        req.getParameter("location")
                 );
-                service.update(r);
-                writeJson(resp, r);
+                service.update(e);
+                writeJson(resp, e);
             } else if ("delete".equals(action)) {
                 Long id = Long.parseLong(req.getParameter("id"));
                 service.delete(id);
                 writeJson(resp, "deleted");
-            } else if ("transition".equals(action)) {
-                Long id = Long.parseLong(req.getParameter("id"));
-                ServiceRequestState next = ServiceRequestState.valueOf(req.getParameter("state"));
-                service.changeState(id, next);
-                ServiceRequest updated = service.getById(id);
-                writeJson(resp, updated);
             } else {
                 writeError(resp, 400, "Unknown action: " + action);
             }

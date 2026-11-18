@@ -1,6 +1,7 @@
 package ua.edu.nupp.kpp.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -23,7 +24,8 @@ public class HttpClient {
 
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     public String get(String path) throws Exception {
         URL url = new URL(BASE + path);
@@ -167,7 +169,9 @@ public class HttpClient {
         params.put("action", "add");
         params.put("equipmentId", String.valueOf(request.getEquipmentId()));
         params.put("description", request.getDescription());
-        params.put("priority", request.getPriority());
+        params.put("f1", String.valueOf(request.getF1()));
+        params.put("f2", String.valueOf(request.getF2()));
+        params.put("f3", String.valueOf(request.getF3()));
         params.put("state", request.getState().name());
         params.put("createdDate", request.getCreatedDate().toString());
         String json = post("/service-request", params);
@@ -180,7 +184,9 @@ public class HttpClient {
         params.put("id", request.getId().toString());
         params.put("equipmentId", String.valueOf(request.getEquipmentId()));
         params.put("description", request.getDescription());
-        params.put("priority", request.getPriority());
+        params.put("f1", String.valueOf(request.getF1()));
+        params.put("f2", String.valueOf(request.getF2()));
+        params.put("f3", String.valueOf(request.getF3()));
         params.put("state", request.getState().name());
         params.put("createdDate", request.getCreatedDate().toString());
         String json = post("/service-request", params);

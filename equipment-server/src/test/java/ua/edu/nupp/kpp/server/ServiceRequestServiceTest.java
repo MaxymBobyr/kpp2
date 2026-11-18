@@ -72,16 +72,34 @@ class ServiceRequestServiceTest {
     void add_blankDescription_throwsBeforeDb() {
         ServiceRequestService service = new ServiceRequestService();
         ServiceRequest r = new ServiceRequest(
-                null, 1L, "", "HIGH", ServiceRequestState.NEW, LocalDate.now());
+                null, 1L, "", 50.0, 60.0, 70.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
         assertThrows(IllegalArgumentException.class,
                 () -> service.add(r));
     }
 
     @Test
-    void add_blankPriority_throwsBeforeDb() {
+    void add_f1OutOfRange_throwsBeforeDb() {
         ServiceRequestService service = new ServiceRequestService();
         ServiceRequest r = new ServiceRequest(
-                null, 1L, "Опис", "", ServiceRequestState.NEW, LocalDate.now());
+                null, 1L, "Опис", 101.0, 60.0, 70.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
+        assertThrows(IllegalArgumentException.class,
+                () -> service.add(r));
+    }
+
+    @Test
+    void add_f2OutOfRange_throwsBeforeDb() {
+        ServiceRequestService service = new ServiceRequestService();
+        ServiceRequest r = new ServiceRequest(
+                null, 1L, "Опис", 50.0, -5.0, 70.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
+        assertThrows(IllegalArgumentException.class,
+                () -> service.add(r));
+    }
+
+    @Test
+    void add_f3OutOfRange_throwsBeforeDb() {
+        ServiceRequestService service = new ServiceRequestService();
+        ServiceRequest r = new ServiceRequest(
+                null, 1L, "Опис", 50.0, 60.0, 150.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
         assertThrows(IllegalArgumentException.class,
                 () -> service.add(r));
     }
@@ -90,7 +108,7 @@ class ServiceRequestServiceTest {
     void add_nullState_throwsBeforeDb() {
         ServiceRequestService service = new ServiceRequestService();
         ServiceRequest r = new ServiceRequest(
-                null, 1L, "Опис", "HIGH", null, LocalDate.now());
+                null, 1L, "Опис", 50.0, 60.0, 70.0, 0.0, null, LocalDate.now());
         assertThrows(IllegalArgumentException.class,
                 () -> service.add(r));
     }
@@ -99,7 +117,7 @@ class ServiceRequestServiceTest {
     void add_zeroEquipmentId_throwsBeforeDb() {
         ServiceRequestService service = new ServiceRequestService();
         ServiceRequest r = new ServiceRequest(
-                null, 0L, "Опис", "HIGH", ServiceRequestState.NEW, LocalDate.now());
+                null, 0L, "Опис", 50.0, 60.0, 70.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
         assertThrows(IllegalArgumentException.class,
                 () -> service.add(r));
     }
@@ -108,7 +126,7 @@ class ServiceRequestServiceTest {
     void add_negativeEquipmentId_throwsBeforeDb() {
         ServiceRequestService service = new ServiceRequestService();
         ServiceRequest r = new ServiceRequest(
-                null, -1L, "Опис", "HIGH", ServiceRequestState.NEW, LocalDate.now());
+                null, -1L, "Опис", 50.0, 60.0, 70.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
         assertThrows(IllegalArgumentException.class,
                 () -> service.add(r));
     }
@@ -124,7 +142,7 @@ class ServiceRequestServiceTest {
     void update_blankDescription_throwsBeforeDb() {
         ServiceRequestService service = new ServiceRequestService();
         ServiceRequest r = new ServiceRequest(
-                1L, 1L, "", "HIGH", ServiceRequestState.NEW, LocalDate.now());
+                1L, 1L, "", 50.0, 60.0, 70.0, 0.0, ServiceRequestState.NEW, LocalDate.now());
         assertThrows(IllegalArgumentException.class,
                 () -> service.update(r));
     }

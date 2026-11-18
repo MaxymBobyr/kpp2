@@ -1,5 +1,6 @@
 package ua.edu.nupp.kpp.server;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -8,20 +9,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 
-public class EquipmentServlet extends HttpServlet {
+public class ServiceRecordServlet extends HttpServlet {
 
-    private final EquipmentService service = new EquipmentService();
+    private final ServiceRecordService service = new ServiceRecordService();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json;charset=UTF-8");
         try {
-            List<Equipment> list = service.getAll();
+            List<ServiceRecord> list = service.getAll();
             mapper.writeValue(resp.getWriter(), list);
         } catch (RuntimeException e) {
             writeError(resp, 500, e.getMessage());
@@ -37,28 +40,28 @@ public class EquipmentServlet extends HttpServlet {
 
         try {
             if ("add".equals(action)) {
-                Equipment e = new Equipment(
+                ServiceRecord r = new ServiceRecord(
                         null,
-                        req.getParameter("name"),
-                        req.getParameter("model"),
-                        req.getParameter("serialNumber"),
-                        req.getParameter("status"),
-                        req.getParameter("location")
+                        Long.parseLong(req.getParameter("requestId")),
+                        Long.parseLong(req.getParameter("specialistId")),
+                        req.getParameter("workDescription"),
+                        LocalDate.parse(req.getParameter("completionDate")),
+                        Integer.parseInt(req.getParameter("timeSpent"))
                 );
-                service.add(e);
-                writeJson(resp, e);
+                service.add(r);
+                writeJson(resp, r);
             } else if ("update".equals(action)) {
                 Long id = Long.parseLong(req.getParameter("id"));
-                Equipment e = new Equipment(
+                ServiceRecord r = new ServiceRecord(
                         id,
-                        req.getParameter("name"),
-                        req.getParameter("model"),
-                        req.getParameter("serialNumber"),
-                        req.getParameter("status"),
-                        req.getParameter("location")
+                        Long.parseLong(req.getParameter("requestId")),
+                        Long.parseLong(req.getParameter("specialistId")),
+                        req.getParameter("workDescription"),
+                        LocalDate.parse(req.getParameter("completionDate")),
+                        Integer.parseInt(req.getParameter("timeSpent"))
                 );
-                service.update(e);
-                writeJson(resp, e);
+                service.update(r);
+                writeJson(resp, r);
             } else if ("delete".equals(action)) {
                 Long id = Long.parseLong(req.getParameter("id"));
                 service.delete(id);
