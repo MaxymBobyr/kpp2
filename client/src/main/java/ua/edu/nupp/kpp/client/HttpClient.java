@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class HttpClient {
 
-    private static final String BASE = "http://localhost:8080/server";
+    private static final String BASE = "http://localhost:8080/equipment-server";
 
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())

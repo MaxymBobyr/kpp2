@@ -1,0 +1,11 @@
+name;model;serialNumber;status;location
+Верстат ЧПУ Fanuc-2000;Fanuc-2000;SN-EQ-00001;ACTIVE;Цех №1
+Компресор Atlas Copco;Atlas Copco;SN-EQ-00002;BROKEN;Підвал
+Генератор Kohler 20kVA;Kohler;SN-EQ-00003;MAINTENANCE;Дах
+Токарний верстат 16К20;16К20;SN-EQ-00004;ACTIVE;Цех №2
+Фрезерний верстат 6А82;6А82;SN-EQ-00005;ACTIVE;Цех №2
+Зварювальний апарат Prestige 250;Prestige 250;SN-EQ-00006;BROKEN;Зварювальна дільниця
+Кран-балка 2т;КБ-2;SN-EQ-00007;ACTIVE;Цех №1
+Пресс гідравлічний П6330;П6330;SN-EQ-00008;MAINTENANCE;Цех №3
+Компресор Atlas Copco GA-90;GA-90;SN-EQ-00009;ACTIVE;Підвал
+Електрогенератор Hatz 30kVA;Hatz;SN-EQ-00010;ACTIVE;Дах

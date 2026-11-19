@@ -38,7 +38,7 @@ public class MainApp extends Application {
 
     private ProgressBar importProgressBar = new ProgressBar(0);
     private Label importStatusLabel = new Label("Готово до імпорту");
-    private Button importButton = new Button("Імпорт CSV");
+    private Button importButton = new Button("Імпорт обладнання CSV");
 
     private TableView<Specialist> specialistTable = new TableView<>();
     private TextField spFullNameField = new TextField();
@@ -152,7 +152,15 @@ public class MainApp extends Application {
         HBox buttons = new HBox(10, btnAdd, btnUpdate, btnDelete, btnRefresh);
         buttons.setAlignment(Pos.CENTER_LEFT);
 
-        VBox left = new VBox(10, equipmentTable, buttons);
+        importButton.setOnAction(e -> startCsvImport());
+        importButton.setMaxWidth(Double.MAX_VALUE);
+        importProgressBar.setPrefWidth(220);
+        importStatusLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox importRow = new HBox(10, importButton, importProgressBar, importStatusLabel);
+        importRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(importStatusLabel, Priority.ALWAYS);
+
+        VBox left = new VBox(10, equipmentTable, buttons, importRow);
         left.setPadding(new Insets(10));
         left.setFillWidth(true);
         VBox.setVgrow(equipmentTable, Priority.ALWAYS);
@@ -225,7 +233,7 @@ public class MainApp extends Application {
     }
 
     private void startCsvImport() {
-        ImportServiceRequestsTask task = new ImportServiceRequestsTask(api);
+        ImportEquipmentTask task = new ImportEquipmentTask(api);
 
         importButton.setDisable(true);
         importProgressBar.progressProperty().bind(task.progressProperty());
@@ -237,8 +245,8 @@ public class MainApp extends Application {
             importStatusLabel.textProperty().unbind();
             importProgressBar.setProgress(0);
             importButton.setDisable(false);
-            refreshServiceRequest();
-            showInfo("Імпорт завершено", "Успішно імпортовано записів: " + imported
+            refreshEquipment();
+            showInfo("Імпорт завершено", "Успішно імпортовано записів обладнання: " + imported
                     + "\nДані оновлено з сервера.");
         });
 
@@ -445,16 +453,16 @@ public class MainApp extends Application {
         descCol.setPrefWidth(200);
         TableColumn<ServiceRequest, String> f1Col = new TableColumn<>("F1");
         f1Col.setCellValueFactory(new PropertyValueFactory<>("f1"));
-        f1Col.setPrefWidth(50);
+        f1Col.setPrefWidth(28);
         TableColumn<ServiceRequest, String> f2Col = new TableColumn<>("F2");
         f2Col.setCellValueFactory(new PropertyValueFactory<>("f2"));
-        f2Col.setPrefWidth(50);
+        f2Col.setPrefWidth(28);
         TableColumn<ServiceRequest, String> f3Col = new TableColumn<>("F3");
         f3Col.setCellValueFactory(new PropertyValueFactory<>("f3"));
-        f3Col.setPrefWidth(50);
+        f3Col.setPrefWidth(28);
         TableColumn<ServiceRequest, String> integralCol = new TableColumn<>("I");
         integralCol.setCellValueFactory(new PropertyValueFactory<>("integralIndicator"));
-        integralCol.setPrefWidth(60);
+        integralCol.setPrefWidth(33);
         TableColumn<ServiceRequest, ServiceRequestState> stateCol = new TableColumn<>("Стан");
         stateCol.setCellValueFactory(new PropertyValueFactory<>("state"));
         stateCol.setPrefWidth(100);
@@ -518,13 +526,13 @@ public class MainApp extends Application {
         form.add(new Label("Опис:"), 0, 1); form.add(srDescField, 1, 1);
         srDescField.setPrefWidth(200);
         form.add(new Label("F1 (критичність):"), 0, 2); form.add(srF1Field, 1, 2);
-        srF1Field.setPrefWidth(50);
+        srF1Field.setPrefWidth(28);
         form.add(new Label("F2 (тяжкість несправності):"), 0, 3); form.add(srF2Field, 1, 3);
-        srF2Field.setPrefWidth(50);
+        srF2Field.setPrefWidth(28);
         form.add(new Label("F3 (вплив простою):"), 0, 4); form.add(srF3Field, 1, 4);
-        srF3Field.setPrefWidth(50);
+        srF3Field.setPrefWidth(28);
         form.add(new Label("I:"), 0, 5); form.add(srIntegralIndicatorField, 1, 5);
-        srIntegralIndicatorField.setPrefWidth(60);
+        srIntegralIndicatorField.setPrefWidth(33);
         form.add(new Label("Стан:"), 0, 6); form.add(srStateCombo, 1, 6);
         srStateCombo.setPrefWidth(100);
         form.add(new Label("Дата (YYYY-MM-DD):"), 0, 7); form.add(srDateField, 1, 7);
@@ -543,15 +551,7 @@ public class MainApp extends Application {
         HBox buttons = new HBox(10, btnAdd, btnUpdate, btnDelete, btnRefresh);
         buttons.setAlignment(Pos.CENTER_LEFT);
 
-        importButton.setOnAction(e -> startCsvImport());
-        importButton.setMaxWidth(Double.MAX_VALUE);
-        importProgressBar.setPrefWidth(220);
-        importStatusLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox importRow = new HBox(10, importButton, importProgressBar, importStatusLabel);
-        importRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(importStatusLabel, Priority.ALWAYS);
-
-        VBox left = new VBox(10, requestTable, buttons, importRow);
+        VBox left = new VBox(10, requestTable, buttons);
         left.setPadding(new Insets(10));
         left.setFillWidth(true);
         VBox.setVgrow(requestTable, Priority.ALWAYS);

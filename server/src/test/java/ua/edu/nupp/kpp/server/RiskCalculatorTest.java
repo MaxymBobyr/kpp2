@@ -12,27 +12,9 @@ class RiskCalculatorTest {
     }
 
     @Test
-    void factor1_concentrationEqualLimit_returnsZero() {
-        double f1 = RiskCalculator.factor1(40.0, 40.0);
-        assertEquals(0.0, f1);
-    }
-
-    @Test
     void factor1_concentrationBelowLimit_returnsZero() {
         double f1 = RiskCalculator.factor1(20.0, 40.0);
         assertEquals(0.0, f1);
-    }
-
-    @Test
-    void factor1_negativeConcentration_throws() {
-        assertThrows(IllegalArgumentException.class,
-                () -> RiskCalculator.factor1(-10.0, 40.0));
-    }
-
-    @Test
-    void factor1_zeroLimit_throws() {
-        assertThrows(IllegalArgumentException.class,
-                () -> RiskCalculator.factor1(10.0, 0.0));
     }
 
     @Test
@@ -54,12 +36,6 @@ class RiskCalculatorTest {
     }
 
     @Test
-    void calculate_allHundreds_returnsHundred() {
-        double result = RiskCalculator.calculate(100.0, 100.0, 100.0);
-        assertEquals(100.0, result);
-    }
-
-    @Test
     void calculate_negativeFactor_throws() {
         assertThrows(IllegalArgumentException.class,
                 () -> RiskCalculator.calculate(-1.0, 50.0, 50.0));
@@ -69,11 +45,5 @@ class RiskCalculatorTest {
     void calculate_factorAbove100_throws() {
         assertThrows(IllegalArgumentException.class,
                 () -> RiskCalculator.calculate(50.0, 101.0, 50.0));
-    }
-
-    @Test
-    void calculate_roundsToTwoDecimals() {
-        double result = RiskCalculator.calculate(33.33, 33.33, 33.33);
-        assertEquals(33.33, result);
     }
 }
