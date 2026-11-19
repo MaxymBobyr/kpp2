@@ -23,6 +23,7 @@ out/
 !/.mvn/wrapper/maven-wrapper.jar
 
 *.log
+*.tmp
 logs/
 
 *.properties
